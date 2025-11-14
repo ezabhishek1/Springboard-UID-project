@@ -1,0 +1,1053 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Powered Aadhaar Card Fraud Detection - Analysis Results</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    />
+  </head>
+  <body
+    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50"
+  >
+    <!-- Header -->
+    <header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <div class="container mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-blue-600 rounded-lg">
+              <svg
+                class="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-xl text-slate-900">
+                AI Powered Fraud Detection for UID Aadhaar
+              </h1>
+              <p class="text-sm text-slate-500">Analysis Report</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button
+              id="exportBtn"
+              class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
+              onclick="exportToCSV()"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+              <span id="exportBtnText">Export Report</span>
+            </button>
+            <a
+              href="/"
+              class="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              New Analysis
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Overall Assessment -->
+        <div class="bg-white rounded-lg shadow-xl border-2 mb-8">
+          <div class="p-6 border-b border-slate-200">
+            <div class="flex items-start justify-between">
+              <div>
+                <h2 class="text-2xl text-slate-900 mb-2">Overall Assessment</h2>
+                <p class="text-sm text-slate-500">
+                  Comprehensive fraud risk evaluation based on multi-layer
+                  analysis
+                </p>
+              </div>
+              <div class="px-6 py-3 rounded-lg border-2 {{ risk_color_class }}">
+                <p class="text-sm opacity-70 mb-1">Risk Level</p>
+                <p class="text-2xl">{{ risk_level }}</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="grid md:grid-cols-2 gap-6 mb-6">
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-slate-600">Fraud Risk Score</span>
+                  <span class="text-sm text-slate-900"
+                    >{{ risk_score }} / 25</span
+                  >
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full"
+                    style="width: {{ risk_score }}%"
+                  ></div>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                  Higher score indicates increased fraud likelihood
+                </p>
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-sm text-slate-600"
+                    >Analysis Confidence</span
+                  >
+                  <span class="text-sm text-slate-900"
+                    >{{ confidence_score }}%</span
+                  >
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-2">
+                  <div
+                    class="bg-blue-600 h-2 rounded-full"
+                    style="width: {{ confidence_score }}%"
+                  ></div>
+                </div>
+                <p class="text-xs text-slate-500 mt-1">
+                  Model confidence in the assessment
+                </p>
+              </div>
+            </div>
+
+            <!-- Conditional Rendering -->
+            {% if show_manual_review_warning %}
+            <div class="border border-amber-200 bg-amber-50 rounded-lg p-4">
+              <div class="flex gap-3">
+                <svg
+                  class="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                <div>
+                  <h4 class="text-amber-900 mb-1">Action Required</h4>
+                  <p class="text-amber-800 text-sm">
+                    Multiple anomalies detected. Manual verification recommended
+                    before proceeding with verification.
+                  </p>
+                </div>
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg border shadow-sm mb-6">
+          <div class="grid grid-cols-4 p-1">
+            <button
+              onclick="switchTab('overview')"
+              id="tab-overview"
+              class="tab-button active-tab flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+              <span>Overview</span>
+            </button>
+            <button
+              onclick="switchTab('front')"
+              id="tab-front"
+              class="tab-button flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                />
+              </svg>
+              <span>Front Card</span>
+            </button>
+            <button
+              onclick="switchTab('back')"
+              id="tab-back"
+              class="tab-button flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                />
+              </svg>
+              <span>Back Card</span>
+            </button>
+            <button
+              onclick="switchTab('metadata')"
+              id="tab-metadata"
+              class="tab-button flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-colors"
+            >
+              <svg
+                class="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                />
+              </svg>
+              <span>Metadata</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab Content: Overview -->
+        <div id="content-overview" class="tab-content">
+          <!-- Fraud Indicators -->
+          <div class="bg-white rounded-lg shadow-lg border mb-6">
+            <div class="p-6 border-b border-slate-200">
+              <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                <svg
+                  class="h-5 w-5 text-amber-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
+                </svg>
+                Detected Fraud Indicators
+              </h3>
+              <p class="text-sm text-slate-500">
+                Anomalies and suspicious patterns identified during analysis
+              </p>
+            </div>
+            <div class="p-6">
+              <div class="space-y-4">
+                {% for indicator in fraud_indicators %}
+                <div
+                  class="flex items-start gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200"
+                >
+                  <div class="flex-shrink-0 mt-1">
+                    {% if indicator.severity == 'high' %}
+                    <svg
+                      class="h-5 w-5 text-red-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {% elif indicator.severity == 'medium' %}
+                    <svg
+                      class="h-5 w-5 text-amber-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    {% else %}
+                    <svg
+                      class="h-5 w-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    {% endif %}
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <span class="text-slate-900">{{ indicator.type }}</span>
+                      <span
+                        class="inline-flex items-center px-2 py-1 rounded text-xs border {{ indicator.badge_class }}"
+                      >
+                        {{ indicator.severity|capitalize }}
+                      </span>
+                    </div>
+                    <p class="text-sm text-slate-600">
+                      {{ indicator.description }}
+                    </p>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="grid md:grid-cols-3 gap-6">
+            <div class="bg-white rounded-lg shadow-md border">
+              <div class="p-6 border-b border-slate-200 pb-3">
+                <h4 class="text-sm text-slate-600">OCR Extraction</h4>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center gap-3">
+                  {% if ocr_status == "Success" %}
+                  <svg
+                    class="h-8 w-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {% else %}
+                  <svg
+                    class="h-8 w-8 text-amber-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  {% endif %}
+                  <div>
+                    <p class="text-2xl text-slate-900">{{ ocr_status }}</p>
+                    <p class="text-xs text-slate-500">{{ ocr_message }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border">
+              <div class="p-6 border-b border-slate-200 pb-3">
+                <h4 class="text-sm text-slate-600">QR Code Status</h4>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center gap-3">
+                  {% if qr_status == "Decoded" %}
+                  <svg
+                    class="h-8 w-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {% else %}
+                  <svg
+                    class="h-8 w-8 text-amber-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  {% endif %}
+                  <div>
+                    <p class="text-2xl text-slate-900">{{ qr_status }}</p>
+                    <p class="text-xs text-slate-500">{{ qr_message }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-md border">
+              <div class="p-6 border-b border-slate-200 pb-3">
+                <h4 class="text-sm text-slate-600">EXIF Analysis</h4>
+              </div>
+              <div class="p-6">
+                <div class="flex items-center gap-3">
+                  {% if exif_status == "Found" %}
+                  <svg
+                    class="h-8 w-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  {% else %}
+                  <svg
+                    class="h-8 w-8 text-amber-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  {% endif %}
+                  <div>
+                    <p class="text-2xl text-slate-900">{{ exif_status }}</p>
+                    <p class="text-xs text-slate-500">{{ exif_message }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Front Card -->
+        <div id="content-front" class="tab-content hidden">
+          <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Annotated Image -->
+            <div class="bg-white rounded-lg shadow-lg border">
+              <div class="p-6 border-b border-slate-200">
+                <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                  <svg
+                    class="h-5 w-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Annotated Image
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Visual analysis with detected anomalies highlighted
+                </p>
+              </div>
+              <div class="p-6">
+                {% if front_annotated_image %}
+                <img
+                  src="{{ front_annotated_image }}"
+                  alt="Annotated Front Card"
+                  class="w-full rounded-lg border-2 border-slate-200"
+                />
+                {% else %}
+                <div
+                  class="bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 aspect-[1.6/1] flex items-center justify-center"
+                >
+                  <div class="text-center text-slate-500">
+                    <svg
+                      class="h-12 w-12 mx-auto mb-2 opacity-50"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p class="text-sm">Front card with bounding boxes</p>
+                    <p class="text-xs">(Annotated regions would appear here)</p>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- OCR Data -->
+            <div class="bg-white rounded-lg shadow-lg border">
+              <div class="p-6 border-b border-slate-200">
+                <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                  <svg
+                    class="h-5 w-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  Extracted OCR Data
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Text data extracted from front side
+                </p>
+              </div>
+              <div class="p-6">
+                <div class="space-y-4">
+                  {% for field in ocr_front %}
+                  <div
+                    class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg"
+                  >
+                    {% if field.icon_type == 'fill' %}
+                    <svg
+                      class="h-5 w-5 text-slate-600 mt-0.5"
+                      fill="currentColor"
+                      stroke="none"
+                      viewBox="{{ field.viewBox }}"
+                    >
+                      {# For fill icons, we don't need stroke-linecap,
+                      stroke-linejoin, or stroke-width #}
+                      <path d="{{ field.icon }}" />
+                    </svg>
+                    {% else %} {# This is for 'stroke' icons #}
+                    <svg
+                      class="h-5 w-5 text-slate-600 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="{{ field.viewBox }}"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.5"
+                        d="{{ field.icon }}"
+                      />
+                    </svg>
+                    {% endif %}
+                    <div class="flex-1">
+                      <p class="text-xs text-slate-500 mb-1">
+                        {{ field.label }}
+                      </p>
+                      <p class="text-slate-900">{{ field.value }}</p>
+                    </div>
+                    <svg
+                      class="h-5 w-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Back Card -->
+        <div id="content-back" class="tab-content hidden">
+          <div class="grid lg:grid-cols-2 gap-6">
+            <!-- Annotated Image -->
+            <div class="bg-white rounded-lg shadow-lg border">
+              <div class="p-6 border-b border-slate-200">
+                <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                  <svg
+                    class="h-5 w-5 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  Annotated Image
+                </h3>
+                <p class="text-sm text-slate-500">
+                  Visual analysis with detected anomalies highlighted
+                </p>
+              </div>
+              <div class="p-6">
+                {% if back_annotated_image %}
+                <img
+                  src="{{ back_annotated_image }}"
+                  alt="Annotated Back Card"
+                  class="w-full rounded-lg border-2 border-slate-200"
+                />
+                {% else %}
+                <div
+                  class="bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 aspect-[1.6/1] flex items-center justify-center"
+                >
+                  <div class="text-center text-slate-500">
+                    <svg
+                      class="h-12 w-12 mx-auto mb-2 opacity-50"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <p class="text-sm">Back card with bounding boxes</p>
+                    <p class="text-xs">(Annotated regions would appear here)</p>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- OCR & QR Data -->
+            <div class="space-y-6">
+              <div class="bg-white rounded-lg shadow-lg border">
+                <div class="p-6 border-b border-slate-200">
+                  <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                    <svg
+                      class="h-5 w-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    Extracted OCR Data
+                  </h3>
+                  <p class="text-sm text-slate-500">
+                    Text data extracted from back side
+                  </p>
+                </div>
+                <div class="p-6">
+                  <div
+                    class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg"
+                  >
+                    <svg
+                      class="h-5 w-5 text-slate-600 mt-0.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                    <div class="flex-1">
+                      <p class="text-xs text-slate-500 mb-1">Address</p>
+                      <p class="text-slate-900 text-sm">{{ ocr_address }}</p>
+                    </div>
+                    <svg
+                      class="h-5 w-5 text-green-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow-lg border">
+                <div class="p-6 border-b border-slate-200">
+                  <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                    <svg
+                      class="h-5 w-5 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"
+                      />
+                    </svg>
+                    QR Code Data
+                  </h3>
+                  <p class="text-sm text-slate-500">
+                    Information decoded from QR code
+                  </p>
+                </div>
+                <div class="p-6">
+                  <div class="space-y-3">
+                    <div
+                      class="flex items-center justify-between p-2 bg-green-50 rounded border border-green-200"
+                    >
+                      <span class="text-sm text-slate-700">Decode Status</span>
+                      <span
+                        class="inline-flex items-center px-2 py-1 rounded text-xs bg-green-600 text-white"
+                        >{{ qr_decode_status }}</span
+                      >
+                    </div>
+                    <div class="h-px bg-slate-200"></div>
+                    <div class="space-y-2 text-sm">
+                      {% for item in qr_data_items %}
+                      <div class="flex justify-between">
+                        <span class="text-slate-600">{{ item.label }}:</span>
+                        <span class="text-slate-900">{{ item.value }}</span>
+                      </div>
+                      {% endfor %} {% if qr_mismatch %}
+                      <div
+                        class="p-2 bg-amber-50 border border-amber-200 rounded"
+                      >
+                        <div class="flex items-start gap-2">
+                          <svg
+                            class="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                          </svg>
+                          <div class="flex-1">
+                            <p class="text-xs text-amber-700 mb-1">
+                              Address Mismatch
+                            </p>
+                            <p class="text-xs text-slate-700">
+                              {{ qr_mismatch_address }}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      {% endif %}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Content: Metadata -->
+        <div id="content-metadata" class="tab-content hidden">
+          <div class="bg-white rounded-lg shadow-lg border">
+            <div class="p-6 border-b border-slate-200">
+              <h3 class="flex items-center gap-2 text-slate-900 mb-1">
+                <svg
+                  class="h-5 w-5 text-blue-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"
+                  />
+                </svg>
+                EXIF Metadata Analysis
+              </h3>
+              <p class="text-sm text-slate-500">
+                Image metadata and editing history
+              </p>
+            </div>
+            <div class="p-6">
+              {% if metadata_warning %}
+              <div
+                class="mb-6 border border-amber-200 bg-amber-50 rounded-lg p-4"
+              >
+                <div class="flex gap-3">
+                  <svg
+                    class="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                    />
+                  </svg>
+                  <div>
+                    <h4 class="text-amber-900 mb-1">
+                      {{ metadata_warning_title }}
+                    </h4>
+                    <p class="text-amber-800 text-sm">
+                      {{ metadata_warning_text }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {% else %}
+              <p>No Exif Data found</p>
+              {% endif %}
+
+              <div class="grid md:grid-cols-2 gap-6">
+                <div class="space-y-3">
+                  {% for field in metadata_fields_left %}
+                  <div
+                    class="p-4 bg-slate-50 rounded-lg border border-slate-200"
+                  >
+                    <p class="text-xs text-slate-500 mb-1">{{ field.label }}</p>
+                    <div class="flex items-center justify-between">
+                      <p class="text-slate-900">{{ field.value }}</p>
+                      {% if field.warning %}
+                      <svg
+                        class="h-5 w-5 text-amber-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      {% else %}
+                      <svg
+                        class="h-5 w-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                <div class="space-y-3">
+                  {% for field in metadata_fields_right %}
+                  <div
+                    class="p-4 bg-slate-50 rounded-lg border border-slate-200"
+                  >
+                    <p class="text-xs text-slate-500 mb-1">{{ field.label }}</p>
+                    <div class="flex items-center justify-between">
+                      <p class="text-slate-900">{{ field.value }}</p>
+                      {% if field.warning %}
+                      <svg
+                        class="h-5 w-5 text-amber-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                        />
+                      </svg>
+                      {% else %}
+                      <svg
+                        class="h-5 w-5 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                        />
+                      </svg>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t bg-white mt-16">
+      <div class="container mx-auto px-6 py-6">
+        <p class="text-center text-sm text-slate-500">
+          © 2025 AI Powered Fraud Detection System for UID Aadhaar. For
+          authorized use only.
+        </p>
+      </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+  </body>
+  <script>
+    function exportToCSV() {
+      const btn = document.getElementById("exportBtn");
+      const btnText = document.getElementById("exportBtnText");
+
+      // Disable button and show loading state
+      btn.disabled = true;
+      btnText.textContent = "Exporting...";
+      btn.classList.add("opacity-50", "cursor-not-allowed");
+
+      // Send POST request to Flask endpoint
+      fetch("/export_csv", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Export failed");
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          // Create download link
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.style.display = "none";
+          a.href = url;
+
+          // Generate filename with timestamp
+          const timestamp = new Date()
+            .toISOString()
+            .replace(/[:.]/g, "-")
+            .slice(0, -5);
+          a.download = `aadhaar_analysis_${timestamp}.csv`;
+
+          // Trigger download
+          document.body.appendChild(a);
+          a.click();
+
+          // Cleanup
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+
+          // Show success message (optional)
+          btnText.textContent = "Exported!";
+          setTimeout(() => {
+            btnText.textContent = "Export Report";
+          }, 2000);
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Failed to export CSV. Please try again.");
+          btnText.textContent = "Export Report";
+        })
+        .finally(() => {
+          // Re-enable button
+          btn.disabled = false;
+          btn.classList.remove("opacity-50", "cursor-not-allowed");
+        });
+    }
+  </script>
+</html>

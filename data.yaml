@@ -1,0 +1,39 @@
+train: ../train/images
+val: ../validation/images
+test: ../test/images
+
+nc: 24
+names:
+  [
+    "-",
+    "Address",
+    "Dob",
+    "Gender",
+    "QR code",
+    "QR missing",
+    "Tampered image",
+    "Tampered logo",
+    "Tampered text",
+    "aadhar card detection - v3 2023-06-15 10-07pm",
+    "consistent addhar",
+    "consistent text",
+    "embelem",
+    "id number",
+    "missing embelem",
+    "missing issue date",
+    "missing logo",
+    "name",
+    "name not there",
+    "name wrong",
+    "namenot there",
+    "photo",
+    "place",
+    "tampered addhar",
+  ]
+
+roboflow:
+  workspace: tampering-detection
+  project: tampering-detection-0muly
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/tampering-detection/tampering-detection-0muly/dataset/2
