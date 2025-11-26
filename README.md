@@ -59,8 +59,8 @@ You need to have Python 3.8+ and Tesseract OCR installed on your system.
 1.  **Clone the Repository**
 
     ```bash
-    git clone https://github.com/CoiferousYogi/AI_Powered_Fraud_Detection_For_UID_Aadhar.git
-    cd AI_Powered_Fraud_Detection_For_UID_Aadhar
+    git clone https://github.com/ezabhishek1/Springboard-UID-project.git
+    cd Springboard-UID-project
     ```
 
 2.  **Create and Activate a Virtual Environment**
