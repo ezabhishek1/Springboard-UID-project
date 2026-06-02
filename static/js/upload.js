@@ -110,33 +110,72 @@ document.addEventListener("DOMContentLoaded", function () {
       logsContainer.scrollTop = logsContainer.scrollHeight;
     }
 
-    // Make AJAX request to initiate task
+    // Make AJAX request with file upload progress tracking
     const formData = new FormData(uploadForm);
-    fetch("/upload", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Diagnostics sequence returned a non-200 response.");
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", "/upload", true);
+
+    // Track upload progress
+    xhr.upload.addEventListener("progress", (e) => {
+      if (e.lengthComputable) {
+        const percentComplete = Math.round((e.loaded / e.total) * 100);
+        if (progressBar) {
+          // Map 0-100% upload to 0-10% of the overall progress bar
+          const uploadProgress = Math.round(percentComplete * 0.1);
+          progressBar.style.width = `${uploadProgress}%`;
         }
-        return response.json();
-      })
-      .then((data) => {
-        const taskId = data.task_id;
-        if (!taskId) {
-          throw new Error("No task ID returned from server.");
+        
+        // Update status or log intermittently
+        const existingUploadLog = document.getElementById("upload-progress-log");
+        if (existingUploadLog) {
+          existingUploadLog.querySelector(".log-text").textContent = `Transmitting payload to secure server: ${percentComplete}%`;
+        } else {
+          const logDiv = document.createElement("div");
+          logDiv.id = "upload-progress-log";
+          logDiv.className = "flex items-start gap-2 animate-fade-in";
+          logDiv.innerHTML = `
+            <span class="text-slate-500">[SYS]</span>
+            <span class="text-cyan-400 log-text">Transmitting payload to secure server: ${percentComplete}%</span>
+          `;
+          logsContainer.appendChild(logDiv);
         }
-        pollTaskStatus(taskId);
-      })
-      .catch((err) => {
-        console.error("AJAX Error:", err);
-        writeLog("CRITICAL", `Process failed: ${err.message}`, true);
-        setTimeout(() => {
-          alert("Aadhaar analysis failed. Returning to upload.");
-          window.location.reload();
-        }, 2000);
-      });
+        logsContainer.scrollTop = logsContainer.scrollHeight;
+      }
+    });
+
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          const taskId = data.task_id;
+          if (!taskId) {
+            throw new Error("No task ID returned from server.");
+          }
+          writeLog("SYS", "Payload secure. Handing off to diagnostics system...");
+          pollTaskStatus(taskId);
+        } catch (err) {
+          handleUploadError(err);
+        }
+      } else {
+        handleUploadError(new Error(`Server returned code ${xhr.status}`));
+      }
+    };
+
+    xhr.onerror = function () {
+      handleUploadError(new Error("Network communication failure."));
+    };
+
+    function handleUploadError(err) {
+      console.error("Upload Error:", err);
+      writeLog("CRITICAL", `Process failed: ${err.message}`, true);
+      setTimeout(() => {
+        alert("Aadhaar analysis failed. Returning to upload.");
+        window.location.reload();
+      }, 2000);
+    }
+
+    xhr.send(formData);
 
     let lastLogIndex = 0;
     function pollTaskStatus(taskId) {

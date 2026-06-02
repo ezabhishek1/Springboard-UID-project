@@ -206,6 +206,124 @@ body {
   background-color: rgba(30, 41, 59, 0.5) !important;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
 }
+/* Pulsing glowing animations for ready submit button */
+@keyframes cyberPulse {
+  0% {
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4), inset 0 0 15px rgba(6, 182, 212, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(99, 102, 241, 0.7), inset 0 0 20px rgba(99, 102, 241, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.4), inset 0 0 15px rgba(6, 182, 212, 0.1);
+  }
+}
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.btn-glowing-pulse:not(:disabled) {
+  background-size: 200% 200%;
+  animation: cyberPulse 2.5s infinite, gradient-flow 4s ease infinite;
+}
+
+/* High-Level Cyber Laser Border Flow */
+@keyframes border-flow {
+  0% {
+    background-position: 0% 0%, 0% 0%;
+  }
+  100% {
+    background-position: 0% 0%, 300% 0%;
+  }
+}
+.btn-laser-border {
+  position: relative;
+  border: 1.5px solid transparent !important;
+  border-radius: 12px !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-image: linear-gradient(to right, #0f172a, #0f172a), linear-gradient(90deg, #00f0ff, #6366f1, #d946ef, #00f0ff) !important;
+  background-size: 100% 100%, 300% 100% !important;
+  animation: border-flow 4s linear infinite;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-laser-border:hover {
+  animation: border-flow 2s linear infinite;
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+  transform: translateY(-1px) scale(1.02);
+}
+
+.btn-laser-border-primary {
+  position: relative;
+  border: 1.5px solid transparent !important;
+  border-radius: 12px !important;
+  background-clip: padding-box, border-box !important;
+  background-origin: padding-box, border-box !important;
+  background-image: linear-gradient(to right, #06b6d4, #4f46e5), linear-gradient(90deg, #d946ef, #8a2be2, #00f0ff, #d946ef) !important;
+  background-size: 100% 100%, 300% 100% !important;
+  animation: border-flow 3s linear infinite;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.25);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+.btn-laser-border-primary:hover {
+  animation: border-flow 1.5s linear infinite;
+  box-shadow: 0 0 25px rgba(99, 102, 241, 0.45);
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* Shimmer Sweep Effect */
+.btn-shimmer-sweep {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px !important;
+}
+.btn-shimmer-sweep::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  pointer-events: none;
+}
+.btn-shimmer-sweep:hover::after {
+  left: 150%;
+  transition: left 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Download Arrow Keyframes */
+@keyframes arrow-download {
+  0% {
+    transform: translateY(-6px);
+    opacity: 0;
+  }
+  30% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+}
+.animate-download-arrow {
+  animation: arrow-download 1.2s infinite ease-in-out;
+  transform-origin: center;
+  display: inline-block;
+}
 
 /* Hidden Class utilities */
 .hidden {
