@@ -16,6 +16,22 @@ body {
 }
 
 /* Background Cyber Grid Overlay */
+@keyframes grid-drift {
+  0% {
+    background-position: 0px 0px;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
+}
+@keyframes grid-sweep {
+  0% {
+    background-position: 0% -100%;
+  }
+  100% {
+    background-position: 0% 100%;
+  }
+}
 .cyber-grid {
   position: fixed;
   inset: 0;
@@ -25,6 +41,23 @@ body {
   background-size: 50px 50px;
   background-position: center;
   z-index: -2;
+  pointer-events: none;
+  animation: grid-drift 40s linear infinite;
+}
+.cyber-grid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 240, 255, 0.03) 30%,
+    rgba(0, 240, 255, 0.05) 50%,
+    rgba(0, 240, 255, 0.03) 70%,
+    transparent 100%
+  );
+  background-size: 100% 200%;
+  animation: grid-sweep 15s ease-in-out infinite;
   pointer-events: none;
 }
 

@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Powered Aadhaar Card Fraud Detection - Analysis Results</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 11l2 2 4-4' stroke='%236366f1'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,11 +42,12 @@
     <div class="cyber-grid"></div>
     <div class="glow-blob-1"></div>
     <div class="glow-blob-2"></div>
+    <canvas id="cyber-canvas" class="fixed inset-0 z-[-3] pointer-events-none opacity-45"></canvas>
 
     <!-- Header -->
     <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50 no-print">
       <div class="container mx-auto px-6 py-4">
-        <div class="flex items-center justify-between">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">
             <div class="p-2.5 bg-gradient-to-br from-cyan-500 to-indigo-600 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)]">
               <svg
@@ -832,5 +834,6 @@
           });
       }
     </script>
+    <script src="{{ url_for('static', filename='js/network_mesh.js') }}"></script>
   </body>
 </html>
