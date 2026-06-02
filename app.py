@@ -9,26 +9,56 @@ import re
 import numpy as np
 from werkzeug.utils import secure_filename
 import tempfile
-import numpy as np
 from huggingface_hub import hf_hub_download
 from supervision import Detections
 import requests
 from skimage.metrics import structural_similarity as ssim
 import xml.etree.ElementTree as ET
-from pyzbar.pyzbar import decode
 import supervision as sv
-from pyzbar.pyzbar import decode
-from pyaadhaar.utils import isSecureQr
-from pyaadhaar.decode import AadhaarSecureQr
 import csv
 from datetime import datetime
 import io
-
+import uuid
+import threading
 import firebase_admin
 from firebase_admin import credentials, firestore
 import json
 
 from dotenv import load_dotenv
+
+# Safe imports for pyzbar and pyaadhaar to handle environments without system DLLs
+try:
+    from pyzbar.pyzbar import decode
+    pyzbar_available = True
+except Exception as e:
+    print(f"Warning: pyzbar could not be loaded. QR code verification will be disabled. Error: {e}")
+    decode = None
+    pyzbar_available = False
+
+try:
+    from pyaadhaar.utils import isSecureQr
+    from pyaadhaar.decode import AadhaarSecureQr
+    pyaadhaar_available = True
+except Exception as e:
+    print(f"Warning: pyaadhaar could not be loaded. Aadhaar QR code decoding will be disabled. Error: {e}")
+    isSecureQr = None
+    AadhaarSecureQr = None
+    pyaadhaar_available = False
+
+# Fallback definitions if libraries are missing/failed to load
+if not pyzbar_available or decode is None:
+    def decode(image, *args, **kwargs):
+        print("Fallback decode: pyzbar is not available.")
+        return []
+
+if not pyaadhaar_available or isSecureQr is None or AadhaarSecureQr is None:
+    def isSecureQr(*args, **kwargs):
+        return False
+    class AadhaarSecureQr:
+        def __init__(self, *args, **kwargs):
+            pass
+        def decodeddata(self):
+            return {"error": "Aadhaar secure QR decoding is disabled because pyaadhaar library could not be loaded."}
 
 load_dotenv()
 
@@ -86,12 +116,13 @@ except:
 # Loading the pre-trained YOLO Object Detection model
 try:
     OBJECT_DETECTION_MODEL_PATH = "./models/best.pt"
+    if not os.path.exists(OBJECT_DETECTION_MODEL_PATH):
+        OBJECT_DETECTION_MODEL_PATH = "./templates/models/best.pt"
     object_detection_model = YOLO(OBJECT_DETECTION_MODEL_PATH)
-    print("Object detection model loaded successfully.")
+    print(f"Object detection model loaded successfully from {OBJECT_DETECTION_MODEL_PATH}.")
     print(f"Object Detection Model classes: {object_detection_model.names}")
 except Exception as e:
     object_detection_model = None
-    print("Warning: YOLO model not loaded. Install ultralytics and download yolov8n.pt")
     print(f"Warning: Custom Object Detection model not loaded. Error: {e}")
 
 # Allowed file extensions
@@ -210,9 +241,17 @@ def detect_objects_yolo(image_path):
 
 
 # Loading the pre-trained YOLO Aadhar model
-aadhaar_model = YOLO(hf_hub_download(**repo_config))
-id2label = aadhaar_model.names
-print(id2label)
+try:
+    os.makedirs("./models", exist_ok=True)
+    aadhaar_model_path = hf_hub_download(**repo_config)
+    aadhaar_model = YOLO(aadhaar_model_path)
+    id2label = aadhaar_model.names
+    print("Aadhaar specific YOLO model loaded successfully.")
+    print(id2label)
+except Exception as e:
+    aadhaar_model = None
+    id2label = {}
+    print(f"Warning: Aadhaar specific YOLO model not loaded. Error: {e}")
 
 
 # Verifying if the image is of frudulent Aadhar card or not using object detection
@@ -350,20 +389,22 @@ def create_annotated_image(image_path, text_model_results, object_model_results)
         image = cv2.imread(image_path)
         
         # Annotations from the text extraction model (Blue boxes)
-        text_detections = Detections.from_ultralytics(text_model_results)
-        text_box_annotator = sv.BoxAnnotator(color=sv.Color.BLUE, thickness=2)
-        text_label_annotator = sv.LabelAnnotator(color=sv.Color.BLUE, text_color=sv.Color.WHITE, text_scale=0.5)
-        
-        image = text_box_annotator.annotate(scene=image.copy(), detections=text_detections)
-        image = text_label_annotator.annotate(scene=image, detections=text_detections)
+        if text_model_results is not None:
+            text_detections = Detections.from_ultralytics(text_model_results)
+            text_box_annotator = sv.BoxAnnotator(color=sv.Color.BLUE, thickness=2)
+            text_label_annotator = sv.LabelAnnotator(color=sv.Color.BLUE, text_color=sv.Color.WHITE, text_scale=0.5)
+            
+            image = text_box_annotator.annotate(scene=image.copy(), detections=text_detections)
+            image = text_label_annotator.annotate(scene=image, detections=text_detections)
 
         # Annotations from your custom object verification model (Red boxes)
-        object_detections = Detections.from_ultralytics(object_model_results)
-        object_box_annotator = sv.BoxAnnotator(color=sv.Color.RED, thickness=2)
-        object_label_annotator = sv.LabelAnnotator(color=sv.Color.RED, text_color=sv.Color.WHITE, text_scale=0.5)
+        if object_model_results is not None:
+            object_detections = Detections.from_ultralytics(object_model_results)
+            object_box_annotator = sv.BoxAnnotator(color=sv.Color.RED, thickness=2)
+            object_label_annotator = sv.LabelAnnotator(color=sv.Color.RED, text_color=sv.Color.WHITE, text_scale=0.5)
 
-        image = object_box_annotator.annotate(scene=image, detections=object_detections)
-        image = object_label_annotator.annotate(scene=image, detections=object_detections)
+            image = object_box_annotator.annotate(scene=image, detections=object_detections)
+            image = object_label_annotator.annotate(scene=image, detections=object_detections)
         
         # Saving the annotated image to the static folder
         annotated_filename = "annotated_" + os.path.basename(image_path)
@@ -376,76 +417,119 @@ def create_annotated_image(image_path, text_model_results, object_model_results)
         return None
 
 #===========================================================================================================        
-def analyze_aadhar_pair(front_path, back_path):
+def analyze_aadhar_pair(front_path, back_path=None, task=None):
     fraud_score = 0
     fraud_indicators = []
     
-    # running the text extaction model on both front and back images
-    text_model_raw_results_front = aadhaar_model.predict(front_path, verbose=False)[0]
-    text_model_raw_results_back = aadhaar_model.predict(back_path, verbose=False)[0]
-    
-    front_ocr_results = extract_aadhaar_data(front_path, text_model_raw_results_front)
-    back_ocr_results = extract_aadhaar_data(back_path, text_model_raw_results_back)
-    
-    front_ocr_data = front_ocr_results.get("data", {})
-    back_ocr_data = back_ocr_results.get("data", {}) 
-    print("DEBUG: Extracted Back OCR Data:", back_ocr_data) # <--- ADD THIS LINE   
-    
-    # running tamper detection on front
-    object_model_raw_results_front = object_detection_model(front_path, verbose=False)[0]
-    object_results_front = run_object_verification(front_path, object_model_raw_results_front)
-    
-    # running tamper detection on back
-    object_model_raw_results_back = object_detection_model(back_path, verbose=False)[0]
-    object_results_back = run_object_verification(back_path, object_model_raw_results_back)
-    
-
-    # qr code analysis
-    qr_results = decode_aadhaar_qr(back_path)
-    if qr_results is None or (isinstance(qr_results, dict) and "error" in qr_results):
-        fraud_indicators.append("Failed to extract QR Code Data.")
-        fraud_score += 3
-    
     # running exif on both front and back
+    if task: task.add_log("Analyzing image metadata headers & EXIF structures...", 12)
     exif_results_front = get_exif_data(front_path)
-    exif_results_back = get_exif_data(back_path)
+    exif_results_back = get_exif_data(back_path) if back_path else {}
     
     # LOGIC FOR EXIF DATA
     front_exif_check = check_for_editing_software(exif_results_front)
-    back_exif_check = check_for_editing_software(exif_results_back)
+    back_exif_check = check_for_editing_software(exif_results_back) if back_path else False
     
     if front_exif_check or back_exif_check:
-        fraud_indicators.append("Use of difital editing software detected in image metadata.")
+        fraud_indicators.append("Use of digital editing software detected in image metadata.")
         fraud_score += 2
+        
+    # running the text extraction model on both front and back images
+    text_model_raw_results_front = None
+    text_model_raw_results_back = None
+    front_ocr_data = {}
+    back_ocr_data = {}
     
+    if aadhaar_model is not None:
+        try:
+            if task: task.add_log("Extracting demographic fields from front image (YOLOv8 + EasyOCR)...", 25)
+            text_model_raw_results_front = aadhaar_model.predict(front_path, verbose=False)[0]
+            front_ocr_results = extract_aadhaar_data(front_path, text_model_raw_results_front)
+            front_ocr_data = front_ocr_results.get("data", {})
+        except Exception as e:
+            print(f"Warning: Aadhaar OCR front prediction failed: {e}")
+            front_ocr_data = {}
+            
+        if back_path:
+            try:
+                if task: task.add_log("Extracting address block from back image (YOLOv8 + EasyOCR)...", 40)
+                text_model_raw_results_back = aadhaar_model.predict(back_path, verbose=False)[0]
+                back_ocr_results = extract_aadhaar_data(back_path, text_model_raw_results_back)
+                back_ocr_data = back_ocr_results.get("data", {})
+            except Exception as e:
+                print(f"Warning: Aadhaar OCR back prediction failed: {e}")
+                back_ocr_data = {}
     
-    general_model_results_front = general_model(front_path, verbose=False)[0]
+    print("DEBUG: Extracted Back OCR Data:", back_ocr_data)
     
-    general_labels = [general_model.names[int(cls)] for cls in general_model_results_front.boxes.cls]
-    human_detected = "person" in general_labels
+    # running tamper detection on front
+    object_model_raw_results_front = None
+    object_results_front = {"error": "Object detection model not available."}
+    if object_detection_model is not None:
+        try:
+            if task: task.add_log("Analyzing front image for digital tampered layers...", 55)
+            object_model_raw_results_front = object_detection_model(front_path, verbose=False)[0]
+            object_results_front = run_object_verification(front_path, object_model_raw_results_front)
+        except Exception as e:
+            print(f"Warning: Custom object detection front failed: {e}")
+            object_results_front = {"error": f"Custom object verification failed: {e}"}
+            
+    # running tamper detection on back
+    object_model_raw_results_back = None
+    object_results_back = {"error": "Object detection model not available."}
+    if back_path and object_detection_model is not None:
+        try:
+            if task: task.add_log("Analyzing back image for digital tampered layers...", 65)
+            object_model_raw_results_back = object_detection_model(back_path, verbose=False)[0]
+            object_results_back = run_object_verification(back_path, object_model_raw_results_back)
+        except Exception as e:
+            print(f"Warning: Custom object detection back failed: {e}")
+            object_results_back = {"error": f"Custom object verification failed: {e}"}
+            
+    # qr code analysis
+    qr_results = None
+    if back_path:
+        if task: task.add_log("Decoding secure QR code cryptographic payload...", 75)
+        qr_results = decode_aadhaar_qr(back_path)
+        if qr_results is None or (isinstance(qr_results, dict) and "error" in qr_results):
+            fraud_indicators.append("Failed to extract QR Code Data.")
+            fraud_score += 3
     
+    # general model
+    general_model_results_front = None
+    general_labels = []
+    human_detected = False
+    if general_model is not None:
+        try:
+            if task: task.add_log("Verifying card holder photo & face detection...", 85)
+            general_model_results_front = general_model(front_path, verbose=False)[0]
+            general_labels = [general_model.names[int(cls)] for cls in general_model_results_front.boxes.cls]
+            human_detected = "person" in general_labels
+        except Exception as e:
+            print(f"Warning: General YOLO detection failed: {e}")
+            
     # confidence scores
+    if task: task.add_log("Executing integrity cross-validation heuristics...", 92)
     all_confidences = []
-    if object_model_raw_results_front.boxes:
+    if object_model_raw_results_front is not None and getattr(object_model_raw_results_front, 'boxes', None) is not None:
         all_confidences.extend(object_model_raw_results_front.boxes.conf.tolist())
-    if object_model_raw_results_back.boxes:
+    if object_model_raw_results_back is not None and getattr(object_model_raw_results_back, 'boxes', None) is not None:
         all_confidences.extend(object_model_raw_results_back.boxes.conf.tolist())
-    if text_model_raw_results_front.boxes:
+    if text_model_raw_results_front is not None and getattr(text_model_raw_results_front, 'boxes', None) is not None:
         all_confidences.extend(text_model_raw_results_front.boxes.conf.tolist())
-    if text_model_raw_results_back.boxes:
+    if text_model_raw_results_back is not None and getattr(text_model_raw_results_back, 'boxes', None) is not None:
         all_confidences.extend(text_model_raw_results_back.boxes.conf.tolist())
         
     # calculating average confidence
     average_confidence = np.mean(all_confidences) if all_confidences else 0.0
     
     combined_ocr_results = front_ocr_data.copy()
-    if "Address" in back_ocr_data:
+    if back_path and "Address" in back_ocr_data:
         combined_ocr_results["Address"] = back_ocr_data["Address"]
     print("Combined OCR Results: ", combined_ocr_results)
     
-    
     # ocr and qr results comparison
-    if isinstance(combined_ocr_results, dict) and isinstance(qr_results, dict) and "error" not in qr_results:
+    if back_path and isinstance(combined_ocr_results, dict) and isinstance(qr_results, dict) and "error" not in qr_results:
         # name comparison
         ocr_name = combined_ocr_results.get("Name","").strip().lower()
         qr_name = qr_results.get("name","").strip().lower()
@@ -455,54 +539,40 @@ def analyze_aadhar_pair(front_path, back_path):
             
         # gender comparison
         ocr_gender = combined_ocr_results.get("Gender","").strip().lower()
-        # QR Gender is either M or F format
         qr_gender = qr_results.get("gender","").strip().lower()
-        # we need to handle "M" vs "Male" and "F" vs "Female"
         if ocr_gender and qr_gender:
             ocr_gender_normalized = ocr_gender[0] if ocr_gender else ""
             qr_gender_normalized = qr_gender[0] if qr_gender else ""
-            # comparison
             if ocr_gender_normalized and qr_gender_normalized and ocr_gender_normalized != qr_gender_normalized:
                 fraud_indicators.append("Mismatch between OCR extracted gender and QR code extracted gender.")
                 fraud_score += 2
-                
         
         # dob comparison
         ocr_dob_raw = combined_ocr_results.get("Date of Birth", "")
         ocr_dob = ocr_dob_raw.replace("-", "/").replace("/", "").strip()
         qr_dob = qr_results.get("dob", "").replace("-","/").replace("/", "").strip()
-        # comparison
         if ocr_dob and qr_dob and ocr_dob != qr_dob:
             fraud_indicators.append("Mismatch between OCR extracted DOB and QR extracted DOB.")
             fraud_score += 3
         
-        
         # aadhaar num comparison
         ocr_num_full = combined_ocr_results.get("Aadhaar Number", "").replace(" ", "").strip()
-        # extracting the last 4 digits of ocr_num_full
         if ocr_num_full and len(ocr_num_full) >= 4:
             ocr_last_4 = ocr_num_full[-4:]
-            # extracting the last 4 digits of aadhar from qr
             qr_ref = qr_results.get("aadhaar_last_4_digit","")
             print(f"OCR Aadhar Num: {ocr_num_full}, Last 4 digits from OCR: {ocr_last_4}")
             print(f"QR Aadhar Num Last 4 digits: {qr_ref}")
-            
-            #comparison
             if ocr_last_4 and qr_ref and ocr_last_4 not in qr_ref and qr_ref not in ocr_last_4:
                 fraud_indicators.append("Mismatch between OCR extracted Aadhar Number and QR code extracted Aadhar Number.")
                 fraud_score += 3
         
-        
         # address comparison
         ocr_address = combined_ocr_results.get("Address", "").strip().lower() 
         qr_address = qr_results.get("address", "").strip().lower()
-        # More lenient address comparison (check if main parts match)
         if ocr_address and qr_address:
-            # Extract key address components (pincode, area names)
             ocr_parts = set(ocr_address.split())
             qr_parts = set(qr_address.split())
             common_parts = ocr_parts & qr_parts
-            # If less than 30% words match, flag as mismatch
             if len(common_parts) < min(len(ocr_parts), len(qr_parts)) * 0.3:
                 fraud_indicators.append("Mismatch between OCR extracted address and QR code extracted address.")
                 fraud_score += 1
@@ -514,20 +584,12 @@ def analyze_aadhar_pair(front_path, back_path):
     if not human_detected:
         fraud_indicators.append("No human detected in the photo area (possible fake document).")
         fraud_score += 5
-
-
-
-    # if ("error" in exif_results_front or not exif_results_front) and ("error" in exif_results_back or not exif_results_back):
-    #     fraud_indicators.append("No EXIF metadata found.")
-    #     fraud_score += 0
     
-
     assessment = (
         "HIGH FRAUD RISK" if fraud_score >= 3 else
         "MODERATE FRAUD RISK" if fraud_score >= 1 else
         "LOW FRAUD RISK"
     )
-    
     
     results = {
         "front": {
@@ -541,9 +603,9 @@ def analyze_aadhar_pair(front_path, back_path):
             "exif_analysis": exif_results_back,
             "ocr_analysis": back_ocr_data,
             "qr_analysis": qr_results,
-            "general_detection": {"human_detected":human_detected, "detected_objects": general_labels}   
+            "general_detection": {"human_detected": human_detected, "detected_objects": general_labels} if back_path else {}
         },
-        "combined_ocr":combined_ocr_results,
+        "combined_ocr": combined_ocr_results,
         "average_confidence": average_confidence,
         "fraud_indicators": fraud_indicators,
         "assessment": assessment,
@@ -595,10 +657,10 @@ def transform_results_for_template(results):
     risk_score = int(raw_fraud_score) # Convert a score out of 25 to a percentage
 
     color_map = {
-        'HIGH': 'border-red-500 text-red-900 bg-red-50',
-        'MODERATE': 'border-amber-500 text-amber-900 bg-amber-50',
-        'LOW': 'border-green-500 text-green-900 bg-green-50',
-        'UNKNOWN': 'border-slate-500 text-slate-900 bg-slate-50'
+        'HIGH': 'border-red-500/40 text-red-400 bg-red-950/20 shadow-[0_0_15px_rgba(239,68,68,0.25)]',
+        'MODERATE': 'border-amber-500/40 text-amber-400 bg-amber-950/20 shadow-[0_0_15px_rgba(245,158,11,0.25)]',
+        'LOW': 'border-emerald-500/40 text-emerald-400 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.25)]',
+        'UNKNOWN': 'border-slate-800 text-slate-400 bg-slate-900/40'
     }
     
     # --- Fraud Indicators ---
@@ -616,7 +678,7 @@ def transform_results_for_template(results):
     })
 
     # --- Front Card OCR ---
-    ocr_front_data = results.get('front', {}).get('ocr_analysis', {})
+    ocr_front_data = results.get('front', {}).get('ocr_analysis') or {}
     ocr_front_list = [
         {"label": "Name", "value": ocr_front_data.get("Name", "N/A"), "viewBox": "0 0 24 24","icon_type": "stroke", "icon": "M22 12.634c-4 3.512-4.572-2.013-6.65-1.617c-2.35.447-3.85 5.428-2.35 5.428s-.5-5.945-2.5-3.89s-2.64 4.74-4.265 2.748C-1.5 5.813 5-1.15 8.163 3.457C10.165 6.373 6.5 16.977 2 22m7-1h10"},
         {"label": "Date of Birth", "value": ocr_front_data.get("Date of Birth", "N/A"), "viewBox": "0 0 24 24", "icon_type": "stroke", "icon": "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"},
@@ -624,18 +686,16 @@ def transform_results_for_template(results):
         {"label": "Aadhaar Number", "value": ocr_front_data.get("Aadhaar Number", "N/A"), "viewBox": "0 0 32 32", "icon_type": "fill", "icon": "M11 19v2H5v-2h2v-5H5v-2h2v-1h2v8zm8 0h-4v-2h2c1.103 0 2-.897 2-2v-2c0-1.103-.897-2-2-2h-4v2h4v2h-2c-1.103 0-2 .897-2 2v4h6zm6-8h-4v2h4v2h-3v2h3v2h-4v2h4c1.103 0 2-.897 2-2v-6c0-1.103-.897-2-2-2M2 4v4h2V4h4V2H4a2 2 0 0 0-2 2m26-2h-4v2h4v4h2V4a2 2 0 0 0-2-2M4 28v-4H2v4a2 2 0 0 0 2 2h4v-2zm24-4v4h-4v2h4a2 2 0 0 0 2-2v-4z"},
     ]
     
-    
     # --- Back OCR Data ---
-    ocr_back_data = results.get('back', {}).get('ocr_analysis', {})
+    ocr_back_data = results.get('back', {}).get('ocr_analysis') or {}
     ocr_back_list = []
     if 'error' not in ocr_back_data:
         for key, val in ocr_back_data.items():
             if key == "Address":
                 ocr_back_list.append({"label": key.capitalize(), "value": val})
             
-
     # --- Back Card Data ---
-    qr_analysis = results.get('back', {}).get('qr_analysis', {})
+    qr_analysis = results.get('back', {}).get('qr_analysis') or {'error': 'No QR code data available'}
     qr_data_list = []
     print(qr_analysis)
     
@@ -644,7 +704,7 @@ def transform_results_for_template(results):
             qr_data_list.append({"label": key.capitalize(), "value": val})
             
     # --- Metadata ---
-    exif_analysis = results.get('front', {}).get('exif_analysis', {})
+    exif_analysis = results.get('front', {}).get('exif_analysis') or {}
     metadata_fields = []
     if 'error' not in exif_analysis:
         for key, val in exif_analysis.items():
@@ -702,7 +762,9 @@ def transform_results_for_template(results):
         except Exception as e:
             print(f"Error saving to Firestore: {e}")
             
-    session['transformed_data'] = transformed_data
+    from flask import has_request_context
+    if has_request_context():
+        session['transformed_data'] = transformed_data
             
     return transformed_data
 
@@ -716,12 +778,17 @@ def export_csv():
     Retrieves the transformed_data from session and creates a CSV download.
     """
     try:
-        # Get the transformed data from session or request
-        # Option 1: From session (if you stored it there)
-        transformed_data = session.get('transformed_data')
-        
-        # Option 2: From global variable (if you stored it there)
-        # transformed_data = current_analysis_results
+        # Get the transformed data from task_id or session
+        task_id = None
+        if request.is_json:
+            task_id = request.json.get('task_id')
+            
+        transformed_data = None
+        if task_id and task_id in tasks:
+            transformed_data = getattr(tasks[task_id], 'transformed_data', None)
+            
+        if not transformed_data:
+            transformed_data = session.get('transformed_data')
         
         if not transformed_data:
             return jsonify({'error': 'No analysis data available'}), 400
@@ -824,60 +891,132 @@ def export_csv():
 def home():
     return render_template('upload.html')
 
+tasks = {}
+tasks_lock = threading.Lock()
+
+class AnalysisTask:
+    def __init__(self, front_path, back_path):
+        self.id = str(uuid.uuid4())
+        self.front_path = front_path
+        self.back_path = back_path
+        self.logs = []
+        self.progress = 0
+        self.status = "queued"
+        self.result_html = None
+        self.error = None
+        self.lock = threading.Lock()
+        
+    def add_log(self, text, progress_pct):
+        with self.lock:
+            self.logs.append(text)
+            self.progress = progress_pct
+            print(f"[Task {self.id}] {text} ({progress_pct}%)")
+
+def run_analysis(task_id):
+    task = tasks.get(task_id)
+    if not task:
+        return
+    try:
+        task.status = "processing"
+        task.add_log("Initializing diagnostics system configuration...", 5)
+        
+        # Running the full, complex analysis
+        analysis_results = analyze_aadhar_pair(task.front_path, task.back_path, task=task)
+        
+        task.add_log("Rendering annotated neural network outputs...", 94)
+        raw = analysis_results.get('raw_results', {})
+        
+        annotated_image_filename_front = create_annotated_image(task.front_path, raw.get('text_front'), raw.get('object_front'))
+        annotated_image_filename_back = create_annotated_image(task.back_path, raw.get('text_back'), raw.get('object_back')) if task.back_path else None
+        
+        # Transforming the results as per the template
+        template_data = transform_results_for_template(analysis_results)
+        
+        # Store transformed data on the task object for CSV extraction
+        task.transformed_data = template_data
+        
+        # render the results within Flask test request context
+        with app.test_request_context():
+            # adding annotated image paths to template data
+            template_data['front_annotated_image'] = f"/static/{annotated_image_filename_front}" if annotated_image_filename_front else None
+            template_data['back_annotated_image'] = f"/static/{annotated_image_filename_back}" if annotated_image_filename_back else None
+            template_data['task_id'] = task.id
+            
+            task.add_log("Formulating interactive report widgets...", 97)
+            task.result_html = render_template('results.html', **template_data)
+            
+        task.status = "completed"
+        task.progress = 100
+        task.add_log("Analysis complete.", 100)
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        task.status = "failed"
+        task.error = str(e)
+        task.add_log(f"Verification aborted: {str(e)}", 100)
+    finally:
+        try:
+            os.unlink(task.front_path)
+        except OSError:
+            pass
+        if task.back_path:
+            try:
+                os.unlink(task.back_path)
+            except OSError:
+                pass
+
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'front_image' not in request.files or 'back_image' not in request.files:
-        flash('Please upload both front and back of the Aadhar card')
-        return redirect(request.url)
+    front_file = request.files.get('front_image')
+    back_file = request.files.get('back_image')
     
-    front_file = request.files['front_image']
-    back_file = request.files['back_image']
-    
-    if front_file.filename == '' or back_file.filename == '':
-        flash('Either one or both images are missing')
-        return redirect(request.url)
-    
-    if (front_file and allowed_file(front_file.filename)) and (back_file and allowed_file(back_file.filename)):
-        filename = secure_filename(front_file.filename)
+    if not front_file or front_file.filename == '':
+        return jsonify({"error": "Front image of Aadhaar card is required"}), 400
         
+    if not allowed_file(front_file.filename):
+        return jsonify({"error": "Invalid front file type. Please upload an image file."}), 400
         
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(front_file.filename)[1]) as tmp_front:
-            front_file.save(tmp_front.name)
-            front_path = tmp_front.name
+    back_path = None
+    if back_file and back_file.filename != '':
+        if not allowed_file(back_file.filename):
+            return jsonify({"error": "Invalid back file type. Please upload an image file."}), 400
+            
+    # Process files
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(front_file.filename)[1]) as tmp_front:
+        front_file.save(tmp_front.name)
+        front_path = tmp_front.name
         
+    if back_file and back_file.filename != '':
         with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(back_file.filename)[1]) as tmp_back:
             back_file.save(tmp_back.name)
             back_path = tmp_back.name
             
+    task = AnalysisTask(front_path, back_path)
+    with tasks_lock:
+        tasks[task.id] = task
         
-        try:
-            # Running the full, complex analysis
-            analysis_results = analyze_aadhar_pair(front_path, back_path)
+    threading.Thread(target=run_analysis, args=(task.id,)).start()
+    return jsonify({"task_id": task.id})
+
+@app.route('/status/<task_id>')
+def task_status(task_id):
+    task = tasks.get(task_id)
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+        
+    with task.lock:
+        response_data = {
+            "id": task.id,
+            "status": task.status,
+            "progress": task.progress,
+            "logs": list(task.logs),
+            "error": task.error
+        }
+        if task.status == "completed":
+            response_data["html"] = task.result_html
             
-            # Transforming the results as per the template
-            template_data = transform_results_for_template(analysis_results)
-            
-            # Creating annotated images
-            raw = analysis_results['raw_results']
-            annotated_image_filename_front = create_annotated_image(front_path, raw['text_front'], raw['object_front'])
-            annotated_image_filename_back = create_annotated_image(back_path, raw['text_back'], raw['object_back'])
-            
-            # adding annotated image paths to template data
-            template_data['front_annotated_image'] = url_for('static', filename=annotated_image_filename_front) if annotated_image_filename_front else None
-            template_data['back_annotated_image'] = url_for('static', filename=annotated_image_filename_back) if annotated_image_filename_back else None
-            
-            # render the results
-            return render_template('results.html', **template_data)
-        finally:
-            try:
-                os.unlink(front_path)
-                os.unlink(back_path)
-            except OSError:
-                pass  
-    else:
-        flash('Invalid file type. Please upload an image file.')
-        return redirect(request.url)
-    
+    return jsonify(response_data)
+
 @app.route('/analyzing')
 def analyzing():
     return render_template('analyzing.html')

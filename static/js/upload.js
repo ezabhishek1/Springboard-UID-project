@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-  // --- Get all DOM elements once ---
+  const uploadForm = document.getElementById("upload-form");
   const frontZone = document.getElementById("front-drop-zone");
   const backZone = document.getElementById("back-drop-zone");
   const frontUploadInput = document.getElementById("front-upload");
@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const analyzeBtn = document.getElementById("analyze-btn");
   const statusEl = document.getElementById("upload-status");
 
-  // --- Helper function to update the UI for a file input ---
+  // Helper to update the drop zone visual state based on selection
   function updateFileDisplay(zoneId, file) {
     const uploadContent = document.getElementById(`${zoneId}-upload-content`);
     const fileInfo = document.getElementById(`${zoneId}-file-info`);
@@ -18,163 +18,184 @@ document.addEventListener("DOMContentLoaded", function () {
     if (file) {
       uploadContent.classList.add("hidden");
       fileInfo.classList.remove("hidden");
-      zone.classList.remove("border-slate-300", "bg-slate-50");
-      zone.classList.add("border-green-500", "bg-green-50");
+      zone.classList.remove("border-slate-700", "bg-slate-900/30");
+      zone.classList.add("border-cyan-500", "bg-cyan-500/5", "upload-zone-active");
       fileNameEl.textContent = file.name;
       fileSizeEl.textContent = (file.size / 1024).toFixed(2) + " KB";
     } else {
       uploadContent.classList.remove("hidden");
       fileInfo.classList.add("hidden");
-      zone.classList.remove("border-green-500", "bg-green-50");
-      zone.classList.add("border-slate-300", "bg-slate-50");
+      zone.classList.remove("border-cyan-500", "bg-cyan-500/5", "upload-zone-active");
+      zone.classList.add("border-slate-700", "bg-slate-900/30");
     }
   }
 
+  // Only the front side image is required to run diagnostics
   function checkFormValidity() {
-    if (frontUploadInput.files.length > 0 && backUploadInput.files.length > 0) {
+    if (frontUploadInput.files.length > 0) {
       analyzeBtn.disabled = false;
+      analyzeBtn.classList.remove("opacity-30", "pointer-events-none");
     } else {
       analyzeBtn.disabled = true;
+      analyzeBtn.classList.add("opacity-30", "pointer-events-none");
     }
   }
 
-  // Helper to show a transient status message to the user
-  function showStatusMessage(msg, timeoutMs = 3000) {
+  function showStatusMessage(msg, isError = false) {
     if (!statusEl) return;
     statusEl.textContent = msg;
-    statusEl.classList.remove("text-red-600");
-    statusEl.classList.add("text-green-600");
-    clearTimeout(showStatusMessage._t);
-    showStatusMessage._t = setTimeout(
-      () => (statusEl.textContent = ""),
-      timeoutMs
-    );
+    if (isError) {
+      statusEl.classList.remove("text-cyan-400");
+      statusEl.classList.add("text-red-400");
+    } else {
+      statusEl.classList.remove("text-red-400");
+      statusEl.classList.add("text-cyan-400");
+    }
   }
 
-  // // --- NEW: Handle form submission with AJAX ---
-  // uploadForm.addEventListener("submit", function (e) {
-  //   e.preventDefault(); // Prevent default form submission
+  // --- AJAX Diagnostics Transition ---
+  uploadForm.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-  //   // Show analyzing page immediately
-  //   showAnalyzingPage();
+    const mainContainer = document.getElementById("main-container");
+    if (!mainContainer) return;
 
-  //   // Create FormData from the form
-  //   const formData = new FormData(uploadForm);
+    // Transition main page into a holographic scan log
+    mainContainer.innerHTML = `
+      <div class="max-w-xl mx-auto glass-panel p-8 rounded-2xl relative overflow-hidden animate-fade-in shadow-[0_0_50px_rgba(0,240,255,0.15)]">
+        <div class="scan-line"></div>
+        
+        <div class="text-center mb-8">
+          <div class="relative inline-block mb-6">
+            <!-- Pulsing outer circle -->
+            <div class="absolute -inset-2 rounded-full border border-cyan-500/30 animate-ping opacity-75"></div>
+            <!-- Rotating futuristic gear -->
+            <div class="h-20 w-20 rounded-full border-2 border-dashed border-cyan-500 flex items-center justify-center animate-spin-slow">
+              <svg class="h-10 w-10 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.92 13.92 0 00-2.3-7.558M12 11c0-3.517 1.009-6.799 2.753-9.571m3.44 2.04l-.054.09A13.916 13.916 0 0015 11a13.92 13.92 0 002.3 7.558M12 11a1 1 0 110-2 1 1 0 010 2z" />
+              </svg>
+            </div>
+          </div>
+          <h2 class="text-xl font-display font-bold text-white tracking-wide">SYSTEM DIAGNOSTICS IN PROGRESS</h2>
+          <p class="text-xs text-slate-400 font-mono mt-1">SECURE NEURAL SCAN CORRELATION</p>
+        </div>
 
-  //   // Submit the form via AJAX
-  //   fetch("/upload", {
-  //     method: "POST",
-  //     body: formData,
-  //   })
-  //     .then((response) => {
-  //       if (!response.ok) {
-  //         throw new Error("Analysis failed");
-  //       }
-  //       return response.text();
-  //     })
-  //     .then((html) => {
-  //       // Replace current page with results page
-  //       document.open();
-  //       document.write(html);
-  //       document.close();
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error:", error);
-  //       alert("Analysis failed. Please try again.");
-  //       // Reload the page to reset
-  //       window.location.reload();
-  //     });
-  // });
+        <!-- Simulated Cyber Logs console -->
+        <div class="bg-slate-950/80 rounded-xl p-5 font-mono text-xs text-cyan-400 border border-slate-800 space-y-2.5 max-h-60 overflow-y-auto mb-6 scrollbar-thin" id="cyber-logs">
+          <div class="flex items-center gap-2 text-slate-500">
+            <span>[SYS]</span>
+            <span class="text-slate-400">Initializing diagnostic session...</span>
+          </div>
+        </div>
 
-  // // --- NEW: Function to show analyzing page ---
-  // function showAnalyzingPage() {
-  //   document.body.innerHTML = `
-  //     <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 flex items-center justify-center">
-  //       <div class="text-center">
-  //         <div class="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-full mb-6 animate-pulse">
-  //           <svg class="h-10 w-10 text-white animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  //             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-  //           </svg>
-  //         </div>
-  //         <h2 class="text-2xl text-slate-900 mb-2">Analyzing Aadhaar Card</h2>
-  //         <p class="text-slate-600 mb-6">Running AI-powered fraud detection algorithms...</p>
-  //         <div class="max-w-md mx-auto space-y-2" id="progress-steps">
-  //           <div class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-blue-200 bg-blue-50">
-  //             <span>Uploading Images</span>
-  //             <span class="text-blue-600">⟳ In Progress</span>
-  //           </div>
-  //           <div class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200">
-  //             <span>OCR Processing</span>
-  //             <span class="text-slate-400">○ Pending</span>
-  //           </div>
-  //           <div class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200">
-  //             <span>QR Code Decoding</span>
-  //             <span class="text-slate-400">○ Pending</span>
-  //           </div>
-  //           <div class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200">
-  //             <span>Visual Analysis</span>
-  //             <span class="text-slate-400">○ Pending</span>
-  //           </div>
-  //           <div class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200">
-  //             <span>Metadata Extraction</span>
-  //             <span class="text-slate-400">○ Pending</span>
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   `;
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+          <div class="bg-gradient-to-r from-cyan-500 to-indigo-500 h-1.5 rounded-full w-0 transition-all duration-500" id="progress-bar"></div>
+        </div>
+      </div>
+    `;
 
-  //   // Animate progress steps
-  //   animateProgressSteps();
-  // }
+    const logsContainer = document.getElementById("cyber-logs");
+    const progressBar = document.getElementById("progress-bar");
 
-  // // --- NEW: Animate the progress steps ---
-  // function animateProgressSteps() {
-  //   const steps = [
-  //     { delay: 500, index: 0, text: "Uploading Images" },
-  //     { delay: 2000, index: 1, text: "OCR Processing" },
-  //     { delay: 4000, index: 2, text: "QR Code Decoding" },
-  //     { delay: 6000, index: 3, text: "Visual Analysis" },
-  //     { delay: 8000, index: 4, text: "Metadata Extraction" },
-  //   ];
+    function writeLog(tag, text, isWarn = false) {
+      if (!logsContainer) return;
+      const logDiv = document.createElement("div");
+      logDiv.className = "flex items-start gap-2 animate-fade-in";
+      const colorClass = isWarn ? "text-amber-400" : "text-cyan-400";
+      logDiv.innerHTML = `
+        <span class="text-slate-500">[${tag}]</span>
+        <span class="${colorClass}">${text}</span>
+      `;
+      logsContainer.appendChild(logDiv);
+      logsContainer.scrollTop = logsContainer.scrollHeight;
+    }
 
-  //   steps.forEach((step) => {
-  //     setTimeout(() => {
-  //       const container = document.getElementById("progress-steps");
-  //       if (!container) return;
+    // Make AJAX request to initiate task
+    const formData = new FormData(uploadForm);
+    fetch("/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Diagnostics sequence returned a non-200 response.");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        const taskId = data.task_id;
+        if (!taskId) {
+          throw new Error("No task ID returned from server.");
+        }
+        pollTaskStatus(taskId);
+      })
+      .catch((err) => {
+        console.error("AJAX Error:", err);
+        writeLog("CRITICAL", `Process failed: ${err.message}`, true);
+        setTimeout(() => {
+          alert("Aadhaar analysis failed. Returning to upload.");
+          window.location.reload();
+        }, 2000);
+      });
 
-  //       const stepElements = container.children;
+    let lastLogIndex = 0;
+    function pollTaskStatus(taskId) {
+      const interval = setInterval(() => {
+        fetch(`/status/${taskId}`)
+          .then((res) => {
+            if (!res.ok) throw new Error("Status query failed");
+            return res.json();
+          })
+          .then((data) => {
+            // Write any new logs
+            if (data.logs && data.logs.length > lastLogIndex) {
+              for (let i = lastLogIndex; i < data.logs.length; i++) {
+                writeLog("NEURAL", data.logs[i]);
+              }
+              lastLogIndex = data.logs.length;
+            }
+            
+            // Update progress bar
+            if (progressBar && data.progress !== undefined) {
+              progressBar.style.width = `${data.progress}%`;
+            }
+            
+            // Handle completed
+            if (data.status === "completed") {
+              clearInterval(interval);
+              writeLog("DONE", "Diagnostics complete. Formulating report...", false);
+              if (progressBar) progressBar.style.width = "100%";
+              
+              setTimeout(() => {
+                document.open();
+                document.write(data.html);
+                document.close();
+              }, 400);
+            }
+            
+            // Handle failed
+            if (data.status === "failed") {
+              clearInterval(interval);
+              writeLog("CRITICAL", `Analysis failed: ${data.error}`, true);
+              setTimeout(() => {
+                alert(`Diagnostics failed: ${data.error}`);
+                window.location.reload();
+              }, 3000);
+            }
+          })
+          .catch((err) => {
+            console.error("Polling error:", err);
+          });
+      }, 500);
+    }
+  });
 
-  //       // Mark previous steps as complete
-  //       for (let i = 0; i < step.index; i++) {
-  //         stepElements[i].className =
-  //           "flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-green-200 bg-green-50";
-  //         stepElements[i].querySelector("span:last-child").innerHTML =
-  //           '<span class="text-green-600">✓ Complete</span>';
-  //       }
-
-  //       // Mark current step as in progress
-  //       if (stepElements[step.index]) {
-  //         stepElements[step.index].className =
-  //           "flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-blue-200 bg-blue-50";
-  //         stepElements[step.index].querySelector("span:last-child").innerHTML =
-  //           '<span class="text-blue-600">⟳ In Progress</span>';
-  //       }
-  //     }, step.delay);
-  //   });
-  // }
-
-  // --- Change listeners ---
+  // --- Event Listeners for File Inputs ---
   frontUploadInput.addEventListener("change", () => {
     if (frontUploadInput.files.length > 0) {
       const file = frontUploadInput.files[0];
       updateFileDisplay("front", file);
-      console.log(
-        `✅ Front image accepted: ${file.name} (${(file.size / 1024).toFixed(
-          2
-        )} KB)`
-      );
-      showStatusMessage(`Front image "${file.name}" uploaded successfully.`);
+      showStatusMessage(`Accepted front image: "${file.name}"`);
     } else {
       updateFileDisplay("front", null);
     }
@@ -185,33 +206,35 @@ document.addEventListener("DOMContentLoaded", function () {
     if (backUploadInput.files.length > 0) {
       const file = backUploadInput.files[0];
       updateFileDisplay("back", file);
-      console.log(
-        `✅ Back image accepted: ${file.name} (${(file.size / 1024).toFixed(
-          2
-        )} KB)`
-      );
-      showStatusMessage(`Back image "${file.name}" uploaded successfully.`);
+      showStatusMessage(`Accepted back image: "${file.name}"`);
     } else {
       updateFileDisplay("back", null);
     }
     checkFormValidity();
   });
 
-  // Handle drag and drop events
-  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+  // --- Drag and Drop Logic ---
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((evtName) => {
     [frontZone, backZone].forEach((zone) => {
-      zone.addEventListener(
-        eventName,
-        (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        },
-        false
-      );
+      zone.addEventListener(evtName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }, false);
     });
   });
 
-  // Handle file drop
+  // Hover highlighting
+  ["dragenter", "dragover"].forEach((evtName) => {
+    frontZone.addEventListener(evtName, () => frontZone.classList.add("upload-zone-active"), false);
+    backZone.addEventListener(evtName, () => backZone.classList.add("upload-zone-active"), false);
+  });
+
+  ["dragleave", "drop"].forEach((evtName) => {
+    frontZone.addEventListener(evtName, () => frontZone.classList.remove("upload-zone-active"), false);
+    backZone.addEventListener(evtName, () => backZone.classList.remove("upload-zone-active"), false);
+  });
+
+  // Drop files
   frontZone.addEventListener("drop", (e) => {
     frontUploadInput.files = e.dataTransfer.files;
     frontUploadInput.dispatchEvent(new Event("change"));
@@ -222,50 +245,19 @@ document.addEventListener("DOMContentLoaded", function () {
     backUploadInput.dispatchEvent(new Event("change"));
   });
 
-  document.getElementById("upload-form").addEventListener("click", (e) => {
-    const button = e.target.closest("button");
-    if (!button) return;
-
-    const onclickAttr = button.getAttribute("onclick");
-
-    if (onclickAttr) {
-      // Handle inline onclick functions
-      e.stopPropagation();
-
-      if (onclickAttr.includes("front-upload")) {
-        frontUploadInput.click();
-      } else if (onclickAttr.includes("back-upload")) {
-        backUploadInput.click();
-      } else if (onclickAttr.includes("removeFrontFile")) {
-        frontUploadInput.value = "";
-        frontUploadInput.dispatchEvent(new Event("change"));
-      } else if (onclickAttr.includes("removeBackFile")) {
-        backUploadInput.value = "";
-        backUploadInput.dispatchEvent(new Event("change"));
-      }
-      return;
-    }
-  });
-
-  // Make drop zones clickable, but ignore if clicking on interactive elements
+  // Click handler wrapper
   frontZone.addEventListener("click", (e) => {
-    // Ignore clicks on buttons, inputs, or their children
-    if (e.target.closest("button") || e.target.closest("input")) {
-      return;
-    }
+    if (e.target.closest("button") || e.target.closest("input")) return;
     frontUploadInput.click();
   });
 
   backZone.addEventListener("click", (e) => {
-    // Ignore clicks on buttons, inputs, or their children
-    if (e.target.closest("button") || e.target.closest("input")) {
-      return;
-    }
+    if (e.target.closest("button") || e.target.closest("input")) return;
     backUploadInput.click();
   });
 });
 
-// Keep these for backward compatibility with HTML onclick attributes
+// Backward compatibility helper function calls
 function removeFrontFile(event) {
   event.stopPropagation();
   const input = document.getElementById("front-upload");

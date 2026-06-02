@@ -7,17 +7,20 @@ function switchTab(tabName) {
 
   // Remove active state from all tabs
   document.querySelectorAll(".tab-button").forEach((button) => {
-    button.classList.remove("active-tab", "bg-slate-100");
-    button.classList.add("hover:bg-slate-50");
+    button.classList.remove("active-tab");
   });
 
   // Show selected tab content
-  document.getElementById("content-" + tabName).classList.remove("hidden");
+  const targetContent = document.getElementById("content-" + tabName);
+  if (targetContent) {
+    targetContent.classList.remove("hidden");
+  }
 
   // Add active state to clicked tab
   const activeTab = document.getElementById("tab-" + tabName);
-  activeTab.classList.add("active-tab", "bg-slate-100");
-  activeTab.classList.remove("hover:bg-slate-50");
+  if (activeTab) {
+    activeTab.classList.add("active-tab");
+  }
 }
 
 // Initialize on page load

@@ -1,90 +1,215 @@
 /* Custom styles for the Aadhaar Fraud Detection System */
 
-/* Tab button active state */
-.tab-button {
-  transition: all 0.2s ease;
+:root {
+  --color-bg: #0b0f19;
+  --color-card: rgba(22, 31, 48, 0.75);
+  --color-border: rgba(38, 53, 74, 0.8);
+  --color-glow: rgba(0, 240, 255, 0.3);
 }
 
-.active-tab {
-  background-color: rgb(241 245 249);
-  color: rgb(15 23 42);
+body {
+  background-color: #0b0f19;
+  font-family: 'Outfit', sans-serif;
+  color: #e2e8f0;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Background Cyber Grid Overlay */
+.cyber-grid {
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(18, 24, 38, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 24, 38, 0.4) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Glowing Ambient Blobs */
+.glow-blob-1 {
+  position: fixed;
+  top: -15%;
+  left: -15%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(99, 102, 241, 0.04) 50%, transparent 100%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(90px);
+  animation: pulse-glow 15s ease-in-out infinite alternate;
+}
+
+.glow-blob-2 {
+  position: fixed;
+  bottom: -15%;
+  right: -15%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(138, 43, 226, 0.12) 0%, rgba(6, 182, 212, 0.04) 50%, transparent 100%);
+  z-index: -1;
+  pointer-events: none;
+  filter: blur(90px);
+  animation: pulse-glow 18s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes pulse-glow {
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.15) translate(4%, 6%);
+  }
+}
+
+/* Glassmorphism styling */
+.glass-panel {
+  background: var(--color-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 40px 0 rgba(0, 0, 0, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-panel:hover {
+  border-color: rgba(0, 240, 255, 0.45);
+  box-shadow: 0 15px 50px 0 rgba(0, 240, 255, 0.15);
+}
+
+/* Cyber Bounding Box Scan Line animation */
+.scan-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, transparent, #00f0ff, transparent);
+  box-shadow: 0 0 12px #00f0ff;
+  animation: scan 4s linear infinite;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% {
+    top: 0%;
+  }
+  50% {
+    top: 100%;
+  }
+  100% {
+    top: 0%;
+  }
+}
+
+/* Neon Glow Texts */
+.text-neon {
+  text-shadow: 0 0 10px rgba(0, 240, 255, 0.6), 0 0 20px rgba(99, 102, 241, 0.3);
+}
+
+/* Custom upload zone drop effect */
+.upload-zone-active {
+  border-color: #00f0ff !important;
+  background-color: rgba(6, 182, 212, 0.08) !important;
+  box-shadow: 0 0 25px rgba(0, 240, 255, 0.25) !important;
+  transform: scale(1.02);
+}
+
+/* Smooth Tab button active state */
+.tab-button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #94a3b8;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.tab-button.active-tab {
+  color: #00f0ff;
+  background-color: rgba(38, 53, 74, 0.5);
+  border-bottom-color: #00f0ff;
 }
 
 .tab-button:not(.active-tab):hover {
-  background-color: rgb(248 250 252);
+  color: #f1f5f9;
+  background-color: rgba(38, 53, 74, 0.25);
 }
 
-/* Hide/Show utilities */
-.hidden {
-  display: none !important;
-}
-
-/* Smooth transitions */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-.transition-colors {
-  transition-property: color, background-color, border-color,
-    text-decoration-color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Custom animations */
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.animate-pulse {
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Backdrop blur support */
-.backdrop-blur-sm {
-  backdrop-filter: blur(4px);
-}
-
-/* Custom scrollbar */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgb(241 245 249);
+  background: #0b0f19;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgb(203 213 225);
+  background: #1e293b;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(148 163 184);
+  background: #334155;
 }
 
-/* Gradient backgrounds */
-.bg-gradient-to-br {
-  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+/* Micro-animations */
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+@keyframes spin-slow {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 15s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.btn-cyber-press {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-cyber-press:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+}
+.btn-cyber-press:active {
+  transform: scale(0.97);
+}
+
+.result-card-item {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.result-card-item:hover {
+  transform: translateY(-2px) scale(1.008);
+  border-color: rgba(6, 182, 212, 0.4) !important;
+  background-color: rgba(30, 41, 59, 0.5) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Hidden Class utilities */
+.hidden {
+  display: none !important;
 }
 
 /* Print styles */

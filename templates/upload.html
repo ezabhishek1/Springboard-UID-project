@@ -1,44 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Powered Aadhaar Card Fraud Detection - Upload</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/styles.css') }}"
     />
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              cyber: {
+                bg: '#0b0f19',
+                card: 'rgba(22, 31, 48, 0.7)',
+                border: 'rgba(38, 53, 74, 0.8)',
+                glow: '#00f0ff',
+                indigo: '#6366f1',
+                purple: '#8a2be2'
+              }
+            },
+            fontFamily: {
+              sans: ['Outfit', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
   </head>
-  <body
-    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50"
-  >
+  <body class="min-h-screen text-slate-100 relative overflow-x-hidden">
+    <!-- Cyber Background Elements -->
+    <div class="cyber-grid"></div>
+    <div class="glow-blob-1"></div>
+    <div class="glow-blob-2"></div>
+
     <!-- Header -->
-    <header class="border-b bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+    <header class="border-b border-slate-800 bg-slate-900/60 backdrop-blur-md sticky top-0 z-50">
       <div class="container mx-auto px-6 py-4">
-        <div class="flex items-center gap-3">
-          <div class="p-2 bg-blue-600 rounded-lg">
-            <svg
-              class="h-6 w-6 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
-            </svg>
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-gradient-to-br from-cyan-500 to-indigo-600 rounded-xl shadow-[0_0_15px_rgba(6,182,212,0.4)]">
+              <svg
+                class="h-6 w-6 text-white"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 class="text-lg md:text-xl font-display font-bold tracking-wide text-white flex items-center gap-2">
+                Springboard <span class="text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 px-2 py-0.5 rounded-full font-mono font-normal">UID SCAN v2</span>
+              </h1>
+              <p class="text-xs text-slate-400">
+                AI-Powered Aadhaar Fraud Detection & Verification
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 class="text-xl text-slate-900">
-              AI Powered Fraud Detection for UID Aadhar
-            </h1>
-            <p class="text-sm text-slate-500">
-              Intelligent Document Verification System
-            </p>
+          <div class="hidden md:flex items-center gap-4 text-xs font-mono text-slate-400">
+            <span class="flex items-center gap-1.5"><span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span> SYSTEM: ONLINE</span>
+            <span class="text-slate-600">|</span>
+            <span>MODELS: 3 LOADED</span>
           </div>
         </div>
       </div>
@@ -46,34 +82,28 @@
 
     <!-- Main Content -->
     <main class="container mx-auto px-6 py-12">
-      <div class="max-w-5xl mx-auto">
+      <div class="max-w-5xl mx-auto" id="main-container">
+        
         <!-- Hero Section -->
-        <div class="text-center mb-12">
-          <div
-            class="inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-4"
-          >
+        <div class="text-center mb-12 animate-fade-in">
+          <div class="inline-flex items-center gap-2 bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 border border-cyan-500/30 text-cyan-400 px-4 py-1.5 rounded-full mb-4 font-mono text-xs tracking-wider shadow-[0_0_15px_rgba(6,182,212,0.1)]">
             <svg
-              class="h-4 w-4"
+              class="h-3.5 w-3.5 animate-spin"
+              viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
-              viewBox="0 0 24 24"
+              stroke-width="3"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              />
+              <circle cx="12" cy="12" r="10" stroke="currentColor" class="opacity-25" />
+              <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" class="opacity-75" />
             </svg>
-            <span class="text-sm">Fast & Trustworthy</span>
+            <span>REAL-TIME MULTI-LAYER ANALYTICS</span>
           </div>
-          <h2 class="text-3xl text-slate-900 mb-3">
-            Upload Aadhaar Card for Analysis
+          <h2 class="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-4">
+            Upload Aadhaar Card For Verification
           </h2>
-          <p class="text-lg text-slate-600 max-w-2xl mx-auto">
-            Our AI-powered system analyzes document authenticity, detects
-            tampering, and verifies data integrity using advanced machine
-            learning algorithms.
+          <p class="text-slate-400 max-w-2xl mx-auto text-sm md:text-base">
+            Upload Aadhaar document images. The neural network detects tampered fields, decodes secure QR content, parses OCR fields, and checks metadata.
           </p>
         </div>
 
@@ -84,92 +114,79 @@
           method="POST"
           enctype="multipart/form-data"
         >
-          <!-- Upload Cards -->
-          <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <!-- Upload Cards Grid -->
+          <div class="grid md:grid-cols-2 gap-8 mb-8">
             <!-- Front Card Upload -->
-            <div class="bg-white rounded-lg shadow-lg border border-slate-200">
-              <div class="p-6 border-b border-slate-200">
-                <h3 class="flex items-center gap-2 text-slate-900 mb-1">
-                  <svg
-                    class="h-5 w-5 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  Front Side
-                </h3>
-                <p class="text-sm text-slate-500">
-                  Upload the front side of the Aadhaar card
-                </p>
+            <div class="glass-panel rounded-2xl overflow-hidden group">
+              <div class="p-5 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
+                <div>
+                  <h3 class="flex items-center gap-2 font-display font-semibold text-white">
+                    <span class="h-2 w-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#00f0ff]"></span>
+                    Front Side (Required)
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Contains Face and Demographic Details</p>
+                </div>
+                <div class="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center font-mono text-xs text-slate-500 font-bold">01</div>
               </div>
               <div class="p-6">
                 <div
                   id="front-drop-zone"
-                  class="border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg p-8 text-center transition-all hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer"
+                  class="border-2 border-dashed border-slate-700 bg-slate-900/30 rounded-xl p-8 text-center transition-all hover:border-cyan-500/50 hover:bg-cyan-500/5 cursor-pointer relative group/zone"
                 >
-                  <div id="front-upload-content">
-                    <svg
-                      class="h-12 w-12 text-slate-400 mx-auto mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    <p class="text-sm text-slate-700 mb-1">
-                      Drag & drop or click to upload
+                  <div id="front-upload-content" class="transition-transform duration-300 group-hover/zone:scale-[1.02]">
+                    <div class="h-14 w-14 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center mx-auto mb-4 group-hover/zone:border-cyan-500/30 group-hover/zone:bg-cyan-500/10 transition-colors">
+                      <svg
+                        class="h-6 w-6 text-slate-400 group-hover/zone:text-cyan-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-200 mb-1">
+                      Drag & Drop image here
                     </p>
-                    <p class="text-xs text-slate-500 mb-3">
-                      PNG, JPG up to 10MB
+                    <p class="text-xs text-slate-400 mb-4 font-mono">
+                      PNG, JPG or JPEG up to 10MB
                     </p>
                     <button
                       type="button"
-                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
+                      class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
                       onclick="event.stopPropagation(); document.getElementById('front-upload').click()"
                     >
-                      Browse Files
+                      Browse File
                     </button>
                   </div>
                   <div id="front-file-info" class="hidden">
-                    <svg
-                      class="h-12 w-12 text-green-600 mx-auto mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p
-                      class="text-sm text-slate-700 mb-1"
-                      id="front-file-name"
-                    ></p>
-                    <p
-                      class="text-xs text-slate-500 mb-3"
-                      id="front-file-size"
-                    ></p>
+                    <div class="h-14 w-14 rounded-full bg-cyan-950 border border-cyan-800 flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        class="h-6 w-6 text-cyan-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-mono font-semibold text-cyan-400 truncate max-w-xs mx-auto mb-1" id="front-file-name"></p>
+                    <p class="text-xs text-slate-500 mb-4" id="front-file-size"></p>
                     <button
                       type="button"
-                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
+                      class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-950/40 hover:bg-red-900/40 border border-red-900/60 text-red-400 transition-colors"
                       onclick="removeFrontFile(event)"
                     >
-                      Remove
+                      Remove File
                     </button>
                   </div>
                   <input
@@ -183,90 +200,77 @@
               </div>
             </div>
 
-            <!-- Back Card Upload -->
-            <div class="bg-white rounded-lg shadow-lg border border-slate-200">
-              <div class="p-6 border-b border-slate-200">
-                <h3 class="flex items-center gap-2 text-slate-900 mb-1">
-                  <svg
-                    class="h-5 w-5 text-blue-600"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                    />
-                  </svg>
-                  Back Side
-                </h3>
-                <p class="text-sm text-slate-500">
-                  Upload the back side of the Aadhaar card
-                </p>
+            <!-- Back Side Card Upload -->
+            <div class="glass-panel rounded-2xl overflow-hidden group">
+              <div class="p-5 border-b border-slate-800 bg-slate-900/40 flex items-center justify-between">
+                <div>
+                  <h3 class="flex items-center gap-2 font-display font-semibold text-white">
+                    <span class="h-2 w-2 rounded-full bg-indigo-400 shadow-[0_0_8px_#6366f1]"></span>
+                    Back Side (Optional)
+                  </h3>
+                  <p class="text-xs text-slate-400 mt-0.5">Contains Address and Secure QR Code</p>
+                </div>
+                <div class="h-7 w-7 rounded-lg bg-slate-800 flex items-center justify-center font-mono text-xs text-slate-500 font-bold">02</div>
               </div>
               <div class="p-6">
                 <div
                   id="back-drop-zone"
-                  class="border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg p-8 text-center transition-all hover:border-blue-400 hover:bg-blue-50/50 cursor-pointer"
+                  class="border-2 border-dashed border-slate-700 bg-slate-900/30 rounded-xl p-8 text-center transition-all hover:border-indigo-500/50 hover:bg-indigo-500/5 cursor-pointer relative group/zone"
                 >
-                  <div id="back-upload-content">
-                    <svg
-                      class="h-12 w-12 text-slate-400 mx-auto mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                      />
-                    </svg>
-                    <p class="text-sm text-slate-700 mb-1">
-                      Drag & drop or click to upload
+                  <div id="back-upload-content" class="transition-transform duration-300 group-hover/zone:scale-[1.02]">
+                    <div class="h-14 w-14 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center mx-auto mb-4 group-hover/zone:border-indigo-500/30 group-hover/zone:bg-indigo-500/10 transition-colors">
+                      <svg
+                        class="h-6 w-6 text-slate-400 group-hover/zone:text-indigo-400 transition-colors"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-semibold text-slate-200 mb-1">
+                      Drag & Drop image here
                     </p>
-                    <p class="text-xs text-slate-500 mb-3">
-                      PNG, JPG up to 10MB
+                    <p class="text-xs text-slate-400 mb-4 font-mono">
+                      PNG, JPG or JPEG up to 10MB
                     </p>
                     <button
                       type="button"
-                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
-                      onclick="event.stopPropagation();document.getElementById('back-upload').click()"
+                      class="inline-flex items-center px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition-colors"
+                      onclick="event.stopPropagation(); document.getElementById('back-upload').click()"
                     >
-                      Browse Files
+                      Browse File
                     </button>
                   </div>
                   <div id="back-file-info" class="hidden">
-                    <svg
-                      class="h-12 w-12 text-green-600 mx-auto mb-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <p
-                      class="text-sm text-slate-700 mb-1"
-                      id="back-file-name"
-                    ></p>
-                    <p
-                      class="text-xs text-slate-500 mb-3"
-                      id="back-file-size"
-                    ></p>
+                    <div class="h-14 w-14 rounded-full bg-indigo-950 border border-indigo-800 flex items-center justify-center mx-auto mb-4">
+                      <svg
+                        class="h-6 w-6 text-indigo-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <p class="text-sm font-mono font-semibold text-indigo-400 truncate max-w-xs mx-auto mb-1" id="back-file-name"></p>
+                    <p class="text-xs text-slate-500 mb-4" id="back-file-size"></p>
                     <button
                       type="button"
-                      class="inline-flex items-center px-4 py-2 border border-slate-300 rounded-lg text-sm bg-white hover:bg-slate-50 transition-colors"
+                      class="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-950/40 hover:bg-red-900/40 border border-red-900/60 text-red-400 transition-colors"
                       onclick="removeBackFile(event)"
                     >
-                      Remove
+                      Remove File
                     </button>
                   </div>
                   <input
@@ -281,43 +285,39 @@
             </div>
           </div>
 
-          <!-- Information Alert -->
-          <div class="mb-6 border border-blue-200 bg-blue-50 rounded-lg p-4">
-            <div class="flex gap-3">
-              <svg
-                class="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <p class="text-slate-700 text-sm">
-                All uploaded documents are processed securely. The analysis
-                typically takes 5-10 seconds.
-              </p>
-            </div>
+          <!-- Alert Information -->
+          <div class="mb-8 border border-slate-800 bg-slate-900/30 rounded-xl p-4 flex gap-3 text-xs md:text-sm text-slate-400 max-w-3xl mx-auto">
+            <svg
+              class="h-5 w-5 text-cyan-400 flex-shrink-0 mt-0.5 shadow-[0_0_8px_rgba(0,240,255,0.2)]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p>
+              Uploaded documents are analyzed locally on our server and are immediately discarded. Only front-side upload is strictly mandatory; uploading both sides enables full cross-verification features.
+            </p>
           </div>
-          <!--Check status-->
-          <div id="upload-status" class="text-center text-sm mt-4"></div>
 
-          <br />
+          <!-- Status Message Indicator -->
+          <div id="upload-status" class="text-center text-xs font-mono mb-4 h-5"></div>
 
-          <!-- Analyze Button -->
+          <!-- Submit Button -->
           <div class="flex justify-center">
             <button
               type="submit"
               id="analyze-btn"
-              class="inline-flex items-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              class="inline-flex items-center px-10 py-3.5 bg-gradient-to-r from-cyan-500 to-indigo-600 text-white rounded-xl font-display font-bold tracking-wider hover:from-cyan-400 hover:to-indigo-500 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition-all duration-300 transform active:scale-95 disabled:opacity-30 disabled:pointer-events-none hover:scale-[1.03]"
               disabled
             >
               <svg
-                class="h-5 w-5 mr-2"
+                class="h-5 w-5 mr-2 animate-pulse"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -329,19 +329,17 @@
                   d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
                 />
               </svg>
-              Analyze Document
+              RUN DIAGNOSTICS
             </button>
           </div>
         </form>
 
         <!-- Features Grid -->
-        <div class="grid md:grid-cols-3 gap-6 mt-16">
-          <div class="text-center p-6">
-            <div
-              class="inline-flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4"
-            >
+        <div class="grid md:grid-cols-3 gap-6 mt-20">
+          <div class="glass-panel p-6 rounded-2xl flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-xl flex items-center justify-center mb-4 text-cyan-400 shadow-[0_0_12px_rgba(0,240,255,0.1)]">
               <svg
-                class="h-6 w-6 text-blue-600"
+                class="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -350,22 +348,20 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                  d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
                 />
               </svg>
             </div>
-            <h3 class="text-slate-900 mb-2">AI-Powered Detection</h3>
-            <p class="text-sm text-slate-600">
-              Advanced machine learning algorithms detect subtle forgeries and
-              alterations
+            <h4 class="font-display font-semibold text-white mb-2 text-sm md:text-base">Neural Scan Engine</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Trained deep networks locate all standard fields, text layers, and seals, identifying anomalies in printing or paper texture.
             </p>
           </div>
-          <div class="text-center p-6">
-            <div
-              class="inline-flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4"
-            >
+          
+          <div class="glass-panel p-6 rounded-2xl flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-indigo-500/10 border border-indigo-500/30 rounded-xl flex items-center justify-center mb-4 text-indigo-400 shadow-[0_0_12px_rgba(99,102,241,0.1)]">
               <svg
-                class="h-6 w-6 text-green-600"
+                class="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -374,22 +370,20 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
                 />
               </svg>
             </div>
-            <h3 class="text-slate-900 mb-2">Multi-Layer Verification</h3>
-            <p class="text-sm text-slate-600">
-              OCR, QR code, metadata, and visual integrity checks for
-              comprehensive analysis
+            <h4 class="font-display font-semibold text-white mb-2 text-sm md:text-base">Secure QR Integrity</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Decodes secure encrypted QR codes, extracting data directly to run match algorithms against visible OCR details.
             </p>
           </div>
-          <div class="text-center p-6">
-            <div
-              class="inline-flex items-center justify-center w-12 h-12 bg-purple-100 rounded-lg mb-4"
-            >
+          
+          <div class="glass-panel p-6 rounded-2xl flex flex-col items-center text-center">
+            <div class="w-12 h-12 bg-purple-500/10 border border-purple-500/30 rounded-xl flex items-center justify-center mb-4 text-purple-400 shadow-[0_0_12px_rgba(138,43,226,0.1)]">
               <svg
-                class="h-6 w-6 text-purple-600"
+                class="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -398,14 +392,13 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="2"
-                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
                 />
               </svg>
             </div>
-            <h3 class="text-slate-900 mb-2">Instant Reports</h3>
-            <p class="text-sm text-slate-600">
-              Get detailed fraud analysis reports with annotated findings in
-              seconds
+            <h4 class="font-display font-semibold text-white mb-2 text-sm md:text-base">Metadata & Exif Audit</h4>
+            <p class="text-xs text-slate-400 leading-relaxed">
+              Scans hidden Exif and file headers for digital artifacts, checking for traces of image editing suites like Photoshop.
             </p>
           </div>
         </div>
@@ -413,12 +406,16 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t bg-white mt-16">
-      <div class="container mx-auto px-6 py-6">
-        <p class="text-center text-sm text-slate-500">
-          © 2025 AI Powered Fraud Detection System for UID Aadhaar. For
-          authorized use only.
+    <footer class="border-t border-slate-900 bg-slate-950/60 mt-20 relative z-10">
+      <div class="container mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-xs text-slate-500 font-mono">
+          &copy; 2026 UID-SCAN INC. ALL RIGHTS RESERVED.
         </p>
+        <div class="flex gap-4 text-xs font-mono text-slate-500">
+          <a href="#" class="hover:text-cyan-400 transition-colors">SECURITY POLICY</a>
+          <span>|</span>
+          <a href="#" class="hover:text-cyan-400 transition-colors">API INTEGRATION</a>
+        </div>
       </div>
     </footer>
 
