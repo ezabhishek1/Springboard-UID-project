@@ -136,11 +136,11 @@
               <div>
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-mono text-slate-400">FRAUD INDEX</span>
-                  <span class="text-xs font-mono font-bold text-cyan-400">{{ risk_score }} / 25</span>
+                  <span class="text-xs font-mono font-bold {% if risk_level == 'HIGH' %}text-red-400{% elif risk_level == 'MODERATE' %}text-amber-400{% else %}text-emerald-400{% endif %}">{{ risk_score }} / 25</span>
                 </div>
                 <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden shadow-inner">
                   <div
-                    class="bg-gradient-to-r from-cyan-400 to-indigo-500 h-2 rounded-full shadow-[0_0_8px_#00f0ff]"
+                    class="h-2 rounded-full {% if risk_level == 'HIGH' %}bg-gradient-to-r from-red-500 to-rose-600 shadow-[0_0_8px_#ef4444]{% elif risk_level == 'MODERATE' %}bg-gradient-to-r from-amber-400 to-orange-500 shadow-[0_0_8px_#f59e0b]{% else %}bg-gradient-to-r from-emerald-400 to-teal-500 shadow-[0_0_8px_#10b981]{% endif %}"
                     style="width: {{ (risk_score / 25 * 100) }}%"
                   ></div>
                 </div>

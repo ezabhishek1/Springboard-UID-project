@@ -585,11 +585,20 @@ def analyze_aadhar_pair(front_path, back_path=None, task=None):
         fraud_indicators.append("No human detected in the photo area (possible fake document).")
         fraud_score += 5
     
-    assessment = (
-        "HIGH FRAUD RISK" if fraud_score >= 3 else
-        "MODERATE FRAUD RISK" if fraud_score >= 1 else
-        "LOW FRAUD RISK"
-    )
+    # Escalate to HIGH RISK if any definitive fraud indicators (mismatch, tampering, face missing) are present
+    has_critical_fraud = False
+    for indicator in fraud_indicators:
+        ind_lower = indicator.lower()
+        if "mismatch" in ind_lower or "tampered" in ind_lower or "no human detected" in ind_lower:
+            has_critical_fraud = True
+            break
+
+    if has_critical_fraud or fraud_score >= 5:
+        assessment = "HIGH FRAUD RISK"
+    elif fraud_score >= 1:
+        assessment = "MODERATE FRAUD RISK"
+    else:
+        assessment = "LOW FRAUD RISK"
     
     results = {
         "front": {
