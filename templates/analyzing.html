@@ -1,67 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AI Aadhaar Fraud Detection - Analyzing</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2300f0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/><path d='M9 11l2 2 4-4' stroke='%236366f1'/></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='css/styles.css') }}"
     />
     <meta http-equiv="refresh" content="3;url={{ redirect_url }}" />
   </head>
-  <body
-    class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 flex items-center justify-center"
-  >
-    <div class="text-center">
-      <div
-        class="inline-flex items-center justify-center w-20 h-20 bg-blue-600 rounded-full mb-6 animate-pulse"
-      >
-        <svg
-          class="h-10 w-10 text-white animate-spin"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-          />
-        </svg>
+  <body class="min-h-screen text-slate-100 relative overflow-x-hidden flex items-center justify-center">
+    <!-- Cyber Background Elements -->
+    <div class="cyber-grid"></div>
+    <div class="glow-blob-1"></div>
+    <div class="glow-blob-2"></div>
+    <canvas id="cyber-canvas" class="fixed inset-0 z-[-3] pointer-events-none opacity-45"></canvas>
+
+    <div class="max-w-md w-full mx-6 glass-panel p-8 rounded-2xl relative overflow-hidden text-center shadow-[0_0_50px_rgba(0,240,255,0.15)]">
+      <div class="scan-line"></div>
+      
+      <div class="relative inline-block mb-6">
+        <div class="absolute -inset-2 rounded-full border border-cyan-500/30 animate-ping opacity-75"></div>
+        <div class="h-20 w-20 rounded-full border-2 border-dashed border-cyan-500 flex items-center justify-center animate-spin-slow">
+          <svg class="h-10 w-10 text-cyan-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 009 11a13.92 13.92 0 00-2.3-7.558M12 11c0-3.517 1.009-6.799 2.753-9.571m3.44 2.04l-.054.09A13.916 13.916 0 0015 11a13.92 13.92 0 002.3 7.558M12 11a1 1 0 110-2 1 1 0 010 2z" />
+          </svg>
+        </div>
       </div>
-      <h2 class="text-2xl text-slate-900 mb-2">Analyzing Aadhaar Card</h2>
-      <p class="text-slate-600 mb-6">
-        Running AI-powered fraud detection algorithms...
-      </p>
-      <div class="max-w-md mx-auto space-y-2">
-        <div
-          class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200"
-        >
-          <span>OCR Processing</span>
-          <span class="text-green-600">✓ Complete</span>
+
+      <h2 class="text-xl font-display font-bold text-white tracking-wide mb-2">Analyzing Aadhaar Card</h2>
+      <p class="text-xs text-slate-400 font-mono mb-6 uppercase tracking-wider">Running AI-powered fraud detection...</p>
+      
+      <div class="space-y-3 font-mono text-xs text-left">
+        <div class="flex items-center justify-between px-4 py-3 bg-slate-900/40 border border-slate-800 rounded-xl">
+          <span class="text-slate-400">OCR Processing</span>
+          <span class="text-emerald-400">✓ Complete</span>
         </div>
-        <div
-          class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200"
-        >
-          <span>QR Code Decoding</span>
-          <span class="text-green-600">✓ Complete</span>
+        <div class="flex items-center justify-between px-4 py-3 bg-slate-900/40 border border-slate-800 rounded-xl">
+          <span class="text-slate-400">QR Code Decoding</span>
+          <span class="text-emerald-400">✓ Complete</span>
         </div>
-        <div
-          class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-blue-200 bg-blue-50"
-        >
-          <span>Visual Analysis</span>
-          <span class="text-blue-600">⟳ In Progress</span>
+        <div class="flex items-center justify-between px-4 py-3 bg-cyan-950/20 border border-cyan-800/40 rounded-xl">
+          <span class="text-cyan-400">Visual Analysis</span>
+          <span class="text-cyan-400 animate-pulse">⟳ In Progress</span>
         </div>
-        <div
-          class="flex items-center justify-between text-sm text-slate-600 px-4 py-2 bg-white rounded-lg border border-slate-200"
-        >
+        <div class="flex items-center justify-between px-4 py-3 bg-slate-900/20 border border-slate-900 rounded-xl text-slate-600">
           <span>Metadata Extraction</span>
-          <span class="text-slate-400">○ Pending</span>
+          <span>○ Pending</span>
         </div>
       </div>
     </div>
+    <script src="{{ url_for('static', filename='js/network_mesh.js') }}"></script>
   </body>
 </html>
