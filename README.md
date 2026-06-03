@@ -2,8 +2,6 @@
 
 [](https://opensource.org/licenses/MIT)
 
-![AI_Powered_Fraud_Detection_For_UID_Aadhar](https://socialify.git.ci/CoiferousYogi/AI_Powered_Fraud_Detection_For_UID_Aadhar/image?font=Inter&forks=1&issues=1&language=1&name=1&owner=1&pattern=Circuit+Board&pulls=1&stargazers=1&theme=Dark)
-
 
 (https://opensource.org/licenses/MIT)
 
